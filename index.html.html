@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro GST Calculator India 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-md w-full glass border border-slate-800 rounded-3xl p-8 shadow-2xl">
+        <div class="mb-8 text-center">
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">GST 2.0 Calc</h1>
+            <p class="text-slate-400 text-sm mt-2">Updated for 2026 Tax Slabs</p>
+        </div>
+
+        <div class="flex bg-slate-900/50 p-1 rounded-xl mb-8 border border-slate-800">
+            <button id="btn-exclusive" onclick="setMode('exclusive')" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white transition-all">GST Exclusive</button>
+            <button id="btn-inclusive" onclick="setMode('inclusive')" class="flex-1 py-2 text-sm font-semibold rounded-lg text-slate-400 transition-all">GST Inclusive</button>
+        </div>
+
+        <div class="space-y-6">
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Amount (₹)</label>
+                <input type="number" id="amount" value="1000" oninput="calculate()" 
+                    class="w-full bg-slate-900 border border-slate-800 rounded-2xl px-5 py-4 text-2xl font-bold text-emerald-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                    placeholder="0.00">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Select Tax Slab</label>
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="setRate(5)" class="rate-btn bg-slate-800 py-3 rounded-xl hover:bg-slate-700 border border-transparent transition-all" data-rate="5">5%</button>
+                    <button onclick="setRate(18)" class="rate-btn bg-slate-800 py-3 rounded-xl hover:bg-slate-700 border border-blue-500/50 bg-blue-500/10" data-rate="18">18%</button>
+                    <button onclick="setRate(40)" class="rate-btn bg-slate-800 py-3 rounded-xl hover:bg-slate-700 border border-transparent transition-all" data-rate="40">40%</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-10 pt-8 border-t border-slate-800 space-y-4">
+            <div class="flex justify-between items-center">
+                <span class="text-slate-400">Net Amount (Base)</span>
+                <span id="res-base" class="font-semibold text-lg">₹1,000.00</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-slate-400">Total GST</span>
+                <span id="res-gst" class="font-semibold text-blue-400 text-lg">+ ₹180.00</span>
+            </div>
+            <div class="flex justify-between items-center text-xs text-slate-500 italic">
+                <span>CGST / SGST Split</span>
+                <span id="res-split">₹90.00 / ₹90.00</span>
+            </div>
+            
+            <div class="bg-gradient-to-br from-slate-900 to-slate-800 p-5 rounded-2xl mt-4 border border-slate-700/50">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-bold uppercase tracking-widest text-slate-300">Total Payable</span>
+                    <span id="res-total" class="text-3xl font-black text-white">₹1,180.00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentRate = 18;
+        let mode = 'exclusive';
+
+        function setMode(newMode) {
+            mode = newMode;
+            document.getElementById('btn-exclusive').className = mode === 'exclusive' ? 'flex-1 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white' : 'flex-1 py-2 text-sm font-semibold rounded-lg text-slate-400';
+            document.getElementById('btn-inclusive').className = mode === 'inclusive' ? 'flex-1 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white' : 'flex-1 py-2 text-sm font-semibold rounded-lg text-slate-400';
+            calculate();
+        }
+
+        function setRate(rate) {
+            currentRate = rate;
+            document.querySelectorAll('.rate-btn').forEach(btn => {
+                btn.className = 'rate-btn bg-slate-800 py-3 rounded-xl hover:bg-slate-700 border border-transparent transition-all';
+                if(parseInt(btn.getAttribute('data-rate')) === rate) {
+                    btn.classList.add('border-blue-500/50', 'bg-blue-500/10');
+                }
+            });
+            calculate();
+        }
+
+        function calculate() {
+            const amount = parseFloat(document.getElementById('amount').value) || 0;
+            let base, gst, total;
+
+            if (mode === 'exclusive') {
+                gst = (amount * currentRate) / 100;
+                base = amount;
+                total = base + gst;
+            } else {
+                base = (amount * 100) / (100 + currentRate);
+                gst = amount - base;
+                total = amount;
+            }
+
+            document.getElementById('res-base').innerText = '₹' + base.toLocaleString('en-IN', {minimumFractionDigits: 2});
+            document.getElementById('res-gst').innerText = (mode === 'exclusive' ? '+ ₹' : '- ₹') + gst.toLocaleString('en-IN', {minimumFractionDigits: 2});
+            document.getElementById('res-split').innerText = '₹' + (gst/2).toLocaleString('en-IN', {minimumFractionDigits: 2}) + ' / ₹' + (gst/2).toLocaleString('en-IN', {minimumFractionDigits: 2});
+            document.getElementById('res-total').innerText = '₹' + total.toLocaleString('en-IN', {minimumFractionDigits: 2});
+        }
+
+        calculate();
+    </script>
+</body>
+</html>
